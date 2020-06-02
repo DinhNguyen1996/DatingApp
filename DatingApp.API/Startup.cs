@@ -39,6 +39,7 @@ namespace DatingApp.API
             services.AddControllers();
             services.AddCors();
             services.AddTransient<IAuthRepository, AuthRepository>();
+            services.AddTransient<IDatingRepository, DatingRepository>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>{
                     options.TokenValidationParameters = new TokenValidationParameters
