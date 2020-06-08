@@ -3,6 +3,7 @@ import { User } from '../../_models/User';
 import { UserService } from '../../_services/user.service';
 import { AlertifyService } from '../../_services/alertify.service';
 import { ActivatedRoute } from '@angular/router';
+import { Pagination, PaginatedResult } from 'src/app/_models/Pagination';
 
 @Component({
   selector: 'app-member-list',
@@ -11,6 +12,13 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class MemberListComponent implements OnInit {
   users: User[];
+  pagination: Pagination;
+  user: User = JSON.parse(localStorage.getItem('user'));
+  genderList = [
+    { value: 'male', display: 'Males' },
+    { value: 'female', display: 'Females' },
+  ];
+  userParams: any = {};
 
   constructor(
     private userService: UserService,
@@ -19,21 +27,56 @@ export class MemberListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.data.subscribe(data => {
+    this.route.data.subscribe((data) => {
       // tslint:disable-next-line: no-string-literal
-      this.users = data['users'];
+      this.users = data['users'].result;
+      this.pagination = data['users'].pagination;
     });
-    // this.loadUsers();
+    if (this.user.gender === 'female') {
+      // tslint:disable-next-line: no-unused-expression
+      this.userParams.gender = 'male';
+    } else {
+      // tslint:disable-next-line: no-unused-expression
+      this.userParams.gender = 'female';
+    }
+    this.userParams.minAge = 18;
+    this.userParams.maxAge = 99;
+    this.userParams.orderBy = 'lastActive';
   }
 
-  // loadUsers() {
-  //   this.userService.getUsers().subscribe(
-  //     (users: User[]) => {
-  //       this.users = users;
-  //     },
-  //     (error) => {
-  //       this.alertify.error(error);
-  //     }
-  //   );
-  // }
+  resetFilters(event: any): void {
+    if (this.user.gender === 'female') {
+      // tslint:disable-next-line: no-unused-expression
+      this.userParams.gender === 'male';
+    } else {
+      // tslint:disable-next-line: no-unused-expression
+      this.userParams.gender === 'female';
+    }
+    this.userParams.minAge = 18;
+    this.userParams.maxAge = 99;
+    this.loadUsers();
+  }
+
+  pageChanged(event: any): void {
+    this.pagination.currentPage = event.page;
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.userService
+      .getUsers(
+        this.pagination.currentPage,
+        this.pagination.itemsPerPage,
+        this.userParams
+      )
+      .subscribe(
+        (res: PaginatedResult<User[]>) => {
+          this.users = res.result;
+          this.pagination = res.pagination;
+        },
+        (error) => {
+          this.alertify.error(error);
+        }
+      );
+  }
 }
