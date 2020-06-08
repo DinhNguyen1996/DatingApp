@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -76,7 +77,14 @@ namespace DatingApp.API.Controllers
                 }
             }
 
-            photoForCreationDto.Url = uploadResult.Uri.ToString();
+            try
+            {
+                photoForCreationDto.Url = uploadResult.Uri.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Cloudinary something is error ", ex);
+            }
             photoForCreationDto.PublicId = uploadResult.PublicId;
 
             var photo = _mapper.Map<Photo>(photoForCreationDto);
@@ -150,7 +158,7 @@ namespace DatingApp.API.Controllers
                 }
             }
 
-            if(photoFromRepo.PublicId == null)
+            if (photoFromRepo.PublicId == null)
             {
                 _repo.Delete(photoFromRepo);
             }
