@@ -57,6 +57,7 @@ namespace DatingApp.API
                         ValidateAudience = false
                     };
                 });
+            services.AddTransient<LogUserActivity>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
