@@ -38,7 +38,7 @@ namespace DatingApp.API
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(x => 
+            services.AddDbContext<DataContext>(x =>
             {
                 x.UseLazyLoadingProxies();
                 x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
@@ -47,9 +47,9 @@ namespace DatingApp.API
             ConfigureServices(services);
         }
 
-         public void ConfigureProductionServices(IServiceCollection services)
+        public void ConfigureProductionServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(x => 
+            services.AddDbContext<DataContext>(x =>
             {
                 x.UseLazyLoadingProxies();
                 x.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
@@ -60,7 +60,7 @@ namespace DatingApp.API
 
         public void ConfigureServices(IServiceCollection services)
         {
-            IdentityBuilder builder = services.AddIdentityCore<User>(opt => 
+            IdentityBuilder builder = services.AddIdentityCore<User>(opt =>
             {
                 opt.Password.RequireDigit = false;
                 opt.Password.RequiredLength = 4;
@@ -87,7 +87,15 @@ namespace DatingApp.API
                     };
                 });
 
-            services.AddControllers(options => 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
+                options.AddPolicy("VipOnly", policy => policy.RequireRole("VIP"));
+
+            });
+
+            services.AddControllers(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
@@ -103,7 +111,6 @@ namespace DatingApp.API
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
             services.AddCors();
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
-            services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IDatingRepository, DatingRepository>();
             services.AddTransient<LogUserActivity>();
         }
