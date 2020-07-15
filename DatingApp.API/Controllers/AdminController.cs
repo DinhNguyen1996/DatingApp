@@ -46,14 +46,19 @@ namespace DatingApp.API.Controllers
         {
             var user = await _userManger.FindByNameAsync(userName);
 
-            var userRoles = await _userManger.GetRolesAsync(user);
+            var userRoles = await _userManger.GetRolesAsync(user);// role in table role
 
             var selectedRoles = roleEditDto.RoleNames;
 
             selectedRoles = selectedRoles ?? new string[] { };
-            var results = await _userManger.AddToRolesAsync(user, selectedRoles.Except(userRoles));
+            var result = await _userManger.AddToRolesAsync(user, selectedRoles.Except(userRoles));
 
-            if (!results.Succeeded)
+            if (!result.Succeeded)
+                return BadRequest("Failed to add the roles");
+
+            result = await _userManger.RemoveFromRolesAsync(user, userRoles.Except(selectedRoles));
+
+             if (!result.Succeeded)
                 return BadRequest("Failed to remove the roles");
 
             return Ok(await _userManger.GetRolesAsync(user));
