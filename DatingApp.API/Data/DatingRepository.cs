@@ -47,7 +47,7 @@ namespace DatingApp.API.Data
 
         public async Task<PagedList<User>> GetUsers(UserParams userParams)
         {
-            var users = _context.Users.OrderByDescending(u => u.LastActive).AsQueryable();
+            var users = _context.Users.Where(x => x.UserName != "admin").OrderByDescending(u => u.LastActive).AsQueryable();
 
             users = users.Where(u => u.Id != userParams.UserId);
 
